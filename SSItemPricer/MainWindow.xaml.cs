@@ -10,7 +10,6 @@ namespace SSItemPricer
 {
     public partial class MainWindow : Window
     {
-        private static decimal _laborRate;
         private const int LaborRateItemNumber = 10030791;
 
         private readonly ViewModel _viewModel;
@@ -136,9 +135,6 @@ namespace SSItemPricer
                 item.BuyUnitPrice = vendor.BuyUnitPrice;
                 item.Calculated = true;
 
-                if (item.ItemNumber == LaborRateItemNumber)
-                    _laborRate = item.BuyUnitPrice;
-
                 return;
             }
 
@@ -162,7 +158,7 @@ namespace SSItemPricer
                 }
 
                 if (bomItem.ItemNumber == LaborRateItemNumber)
-                    item.LaborCost = _laborRate * bomItem.ItemQuantity;
+                    item.LaborCost = bomItem.BuyUnitPrice * bomItem.ItemQuantity;
 
                 item.BuyUnitPrice += bomItem.BuyUnitPrice * bomItem.ItemQuantity;
             }
