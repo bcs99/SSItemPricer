@@ -15,6 +15,7 @@
         public string Status { get; set; }
         public decimal PartsCost => BuyUnitPrice - LaborCost;
 
+
         public bool UseBOM
         {
             get => _isBom;

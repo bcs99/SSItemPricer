@@ -3,6 +3,8 @@ using System.ComponentModel;
 using System.Linq;
 using System.Threading;
 using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Input;
 using SSItemPricer.Annotations;
 using SSItemPricer.Models;
 
@@ -88,9 +90,38 @@ namespace SSItemPricer
         {
             CancelBtn.Visibility = Visibility.Visible;
             _worker.RunWorkerAsync(_viewModel.Items.ToList());
+
+            DataGrid.SelectedItem = _viewModel.Items.FirstOrDefault(i => i.ItemNumber == 10030094);
+            DataGrid.UpdateLayout();
+            DataGrid.ScrollIntoView(DataGrid.SelectedItem);
         }
 
         private void Cancel_Clicked(object sender, RoutedEventArgs e) => _worker.CancelAsync();
+
+
+        private void DataGridKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key != Key.Return) return;
+
+            ShowBomWindow(sender);
+        }
+
+        private void DataGridDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            ShowBomWindow(sender);
+        }
+
+        private void ShowBomWindow(object sender)
+        {
+            if (sender is not DataGrid dataGrid) return;
+
+            if (dataGrid.SelectedItem is not Item item) return;
+
+            if (item.UseBOM == false) return;
+
+            new BomWindow(item, _viewModel.Items) { Owner = this }.Show();
+        }
+
 
         private static void WorkerOnDoWork([CanBeNull] object sender, DoWorkEventArgs e)
         {
@@ -118,10 +149,14 @@ namespace SSItemPricer
 
         private static void GetCost(List<Item> items, Item item)
         {
+            item.Notes = "";
             item.BuyUnitPrice = 0M;
 
-            var vendor = Mis.FindOne<ItemVendor>(
-                $"SELECT * FROM tblItemVendor AS I JOIN tblVendor AS V ON (V.VendorID = I.VendorID) WHERE ItemID={item.ItemNumber} AND VendorPriority=1");
+            var vendor = Mis.FindOne<ItemVendor>(@$"
+                SELECT * FROM tblItemVendor AS I 
+                JOIN tblVendor AS V ON (V.VendorID = I.VendorID) 
+                WHERE ItemID={item.ItemNumber} AND VendorPriority=1"
+            );
 
             if (vendor == null)
             {
@@ -140,29 +175,52 @@ namespace SSItemPricer
 
             item.UseBOM = true;
 
+            var buyUnitPrice = 0M;
+            var laborCost = 0M;
             var bomItems =
-                Mis.FindMany<BOMItems>(
-                    $@"SELECT * FROM tblBOMItems AS B JOIN tblItem AS I ON (B.ItemID = I.ItemNumber) JOIN tblItemVendor AS V ON (V.ItemID=I.ItemNumber AND V.VendorPriority=1) WHERE B.BOMID={item.ItemNumber}");
+                Mis.FindMany<BOMItems>($@"
+                    SELECT * FROM tblBOMItems AS B 
+                    JOIN tblItem AS I ON (B.ItemID = I.ItemNumber) 
+                    JOIN tblItemVendor AS V ON (V.ItemID=I.ItemNumber AND V.VendorPriority=1) 
+                    WHERE B.BOMID={item.ItemNumber}"
+                );
+
+            if (bomItems.Count == 0) 
+                item.Notes = "Item BOM is empty";
 
             foreach (var bomItem in bomItems)
             {
-                if (bomItem.UseBOM)
+                if (item.Discontinued == false && bomItem.Discontinued)
+                    item.Notes = "Item BOM contains discontinued item(s)";
+
+                if (bomItem.ItemNumber == item.ItemNumber)
                 {
-                    var lookup = items.FirstOrDefault(i => i.ItemNumber == bomItem.ItemNumber && i.Calculated);
+                    item.Notes = "Item BOM contains itself";
+                    return;
+                }
 
-                    if (lookup == null)
-                        return;
+                var lookup = items.FirstOrDefault(i => i.ItemNumber == bomItem.ItemNumber);
 
-                    if (item.Discontinued == false && bomItem.Discontinued)
-                        item.Notes = "Item BOM contains discontinued item(s)";
+                if (lookup == null)
+                {
+                    item.Notes = $"Could not find BOM item ({bomItem.ItemNumber})";
+                    return;
+                }
+
+                if (lookup.Calculated == false)
+                {
+                    item.Notes = $"BOM item not calculated ({bomItem.ItemNumber})";
+                    return;
                 }
 
                 if (bomItem.ItemNumber == LaborRateItemNumber)
-                    item.LaborCost = bomItem.BuyUnitPrice * bomItem.ItemQuantity;
+                    laborCost = lookup.BuyUnitPrice * bomItem.ItemQuantity;
 
-                item.BuyUnitPrice += bomItem.BuyUnitPrice * bomItem.ItemQuantity;
+                buyUnitPrice += lookup.BuyUnitPrice * bomItem.ItemQuantity;
             }
 
+            item.LaborCost = laborCost;
+            item.BuyUnitPrice = buyUnitPrice;
             item.Calculated = true;
         }
     }

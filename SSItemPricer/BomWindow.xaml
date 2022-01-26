@@ -1,4 +1,4 @@
-﻿<Window x:Class="SSItemPricer.MainWindow"
+﻿<Window x:Class="SSItemPricer.BomWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -6,24 +6,18 @@
         xmlns:local="clr-namespace:SSItemPricer"
         mc:Ignorable="d"
         SizeToContent="WidthAndHeight"
-        WindowStartupLocation="CenterScreen"
-        MaxHeight="650"
-        Title="SS Item Pricer" Height="650" Width="800">
+        MaxHeight="600"
+        Title="BomWindow" Height="450" Width="800">
 
     <Window.DataContext>
-        <local:ViewModel />
+        <local:BomViewModel />
     </Window.DataContext>
 
     <DockPanel>
-        <Menu DockPanel.Dock="Top">
-            <MenuItem Header="Calculate" Click="Calculate_Clicked" />
-            <MenuItem x:Name="CancelBtn" Header="Cancel" Click="Cancel_Clicked" Visibility="Hidden" />
-        </Menu>
         <StatusBar DockPanel.Dock="Bottom">
-            <StatusBarItem x:Name="StatusBarItem" Content="..." />
-            <StatusBarItem x:Name="Version" Content="{Binding Version}" HorizontalAlignment="Right" />
+            <StatusBarItem x:Name="StatusBarItem" HorizontalAlignment="Right" FontWeight="Bold"/>
         </StatusBar>
-        <DataGrid x:Name="DataGrid" ItemsSource="{Binding Items}" AutoGenerateColumns="False" IsReadOnly="True"
+        <DataGrid ItemsSource="{Binding Materials}" AutoGenerateColumns="False" IsReadOnly="True"
                   PreviewKeyDown="DataGridKeyDown" MouseDoubleClick="DataGridDoubleClick">
             <DataGrid.Resources>
                 <Style TargetType="{x:Type TextBlock}" x:Key="CenterCell">
@@ -39,7 +33,6 @@
                 <DataGridTextColumn Header="Item Number" Binding="{Binding ItemNumber}" />
                 <DataGridTextColumn Header="Item Description" Binding="{Binding ItemName}" />
                 <DataGridCheckBoxColumn Header="BOM" Binding="{Binding UseBOM}" />
-                <DataGridCheckBoxColumn Header="Discontinued" Binding="{Binding Discontinued}" />
                 <DataGridTextColumn Header="Status" Binding="{Binding Status}" />
                 <DataGridTextColumn Header="Parts" Binding="{Binding PartsCost, StringFormat=\{0:0.0000\}}"
                                     ElementStyle="{StaticResource RightCell}" />
@@ -47,7 +40,9 @@
                                     ElementStyle="{StaticResource RightCell}" />
                 <DataGridTextColumn Header="Price" Binding="{Binding BuyUnitPrice, StringFormat=\{0:0.0000\}}"
                                     ElementStyle="{StaticResource RightCell}" />
-                <DataGridCheckBoxColumn Header="Calculated" Binding="{Binding Calculated}" />
+                <DataGridTextColumn Header="Quantity" Binding="{Binding ItemQuantity}" />
+                <DataGridTextColumn Header="Total" Binding="{Binding Total, StringFormat=\{0:0.0000\}}" 
+                                    ElementStyle="{StaticResource RightCell}" />
                 <DataGridTextColumn Header="Notes" Binding="{Binding Notes}" />
             </DataGrid.Columns>
         </DataGrid>
