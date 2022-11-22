@@ -10,6 +10,8 @@
           FROM dbo.tblItem I
                    JOIN dbo.tblItemVendor IV ON IV.ItemID = I.ItemNumber AND VendorPriority = 1
                    JOIN dbo.tblECOStatus S ON S.ECOStatusID = I.ECOStatusID
+          --IGNORE Items with circular references (i.e. includes itself in the BOM)
+          WHERE NOT EXISTS (SELECT * FROM dbo.tblBOMItems BI WHERE BI.BOMID = I.ItemNumber AND BI.ItemID = I.ItemNumber)
           UNION ALL
           SELECT CTE.RootId,
                  CAST(CTE.ItemQuantity * BI.ItemQuantity AS DECIMAL(10, 3)),
@@ -21,7 +23,7 @@
                       IIF(CTE.Level = 0 AND BI.ItemId = 10030791, IV.BuyUnitPrice, 0) AS MONEY),
                  CTE.Level + 1
           FROM dbo.tblBOMItems BI
-                   JOIN dbo.tblItemVendor IV ON IV.ItemID = BI.ItemID AND VendorPriority = 1
+                   JOIN dbo.tblItemVendor IV ON IV.ItemID = BI.ItemID AND IV.VendorPriority = 1
                    JOIN CTE ON CTE.ItemID = BI.BOMID
           WHERE CTE.UseBOM = 1
             AND BI.ItemQuantity != 0
