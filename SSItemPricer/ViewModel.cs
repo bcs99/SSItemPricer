@@ -19,5 +19,9 @@ namespace SSItemPricer
         }
 
         public ObservableCollection<Item> Items { get; set; } = new();
+
+        public ViewModel()
+        {
+        }
     }
 }

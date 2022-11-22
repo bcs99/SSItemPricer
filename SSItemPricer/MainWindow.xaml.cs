@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Windows;
@@ -25,11 +27,14 @@ namespace SSItemPricer
             InitializeComponent();
 
             _viewModel = (ViewModel)DataContext;
+            
             _viewModel.Version = $" v{typeof(MainWindow).Assembly.GetName().Version}";
 
-            foreach (var item in Mis.FindMany<Item>("SELECT *  FROM tblItem ORDER BY ItemNumber"))
+            foreach (var item in Mis.FindMany<Item>(
+                         "SELECT *  FROM dbo.tblItem JOIN dbo.tblItemVendor ON (ItemID = ItemNumber AND VendorPriority = 1) ORDER BY ItemNumber"))
             {
                 item.BuyUnitPrice = item.UseBOM ? 0M : item.BuyUnitPrice;
+
                 item.Status = item.ECOStatusID switch
                 {
                     1 => "Draft",
@@ -77,7 +82,7 @@ namespace SSItemPricer
                 _last = _remaining;
                 _remaining = _viewModel.Items.Count(i => i.Calculated == false);
                 if (_last == _remaining)
-                    StatusBarItem.Content = $"Calculations completed ({_remaining} items could not be calculated).";
+                    StatusBarItem.Content = $"Calculations completed. ({_remaining} items could not be calculated).";
                 else
                 {
                     _pass++;
@@ -153,8 +158,8 @@ namespace SSItemPricer
             item.BuyUnitPrice = 0M;
 
             var vendor = Mis.FindOne<ItemVendor>(@$"
-                SELECT * FROM tblItemVendor AS I 
-                JOIN tblVendor AS V ON (V.VendorID = I.VendorID) 
+                SELECT * FROM dbo.tblItemVendor AS I 
+                JOIN dbo.tblVendor AS V ON (V.VendorID = I.VendorID) 
                 WHERE ItemID={item.ItemNumber} AND VendorPriority=1"
             );
 
@@ -164,6 +169,9 @@ namespace SSItemPricer
                 item.Calculated = true;
                 return;
             }
+
+            item.SetupCost = vendor.SetupCost;
+            item.PieceCost = vendor.PieceCost;
 
             if (vendor.UseBOM == false)
             {
@@ -179,13 +187,13 @@ namespace SSItemPricer
             var laborCost = 0M;
             var bomItems =
                 Mis.FindMany<BOMItems>($@"
-                    SELECT * FROM tblBOMItems AS B 
-                    JOIN tblItem AS I ON (B.ItemID = I.ItemNumber) 
-                    JOIN tblItemVendor AS V ON (V.ItemID=I.ItemNumber AND V.VendorPriority=1) 
+                    SELECT * FROM dbo.tblBOMItems AS B 
+                    JOIN dbo.tblItem AS I ON (B.ItemID = I.ItemNumber) 
+                    JOIN dbo.tblItemVendor AS V ON (V.ItemID=I.ItemNumber AND V.VendorPriority=1) 
                     WHERE B.BOMID={item.ItemNumber}"
                 );
 
-            if (bomItems.Count == 0) 
+            if (bomItems.Count == 0)
                 item.Notes = "Item BOM is empty";
 
             foreach (var bomItem in bomItems)
@@ -214,9 +222,9 @@ namespace SSItemPricer
                 }
 
                 if (bomItem.ItemNumber == LaborRateItemNumber)
-                    laborCost = lookup.BuyUnitPrice * bomItem.ItemQuantity;
+                    laborCost = Math.Round(lookup.BuyUnitPrice * bomItem.ItemQuantity, 4);
 
-                buyUnitPrice += lookup.BuyUnitPrice * bomItem.ItemQuantity;
+                buyUnitPrice += Math.Round(lookup.BuyUnitPrice * bomItem.ItemQuantity, 4);
             }
 
             item.LaborCost = laborCost;

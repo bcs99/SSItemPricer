@@ -7,4 +7,15 @@
         <UseWPF>true</UseWPF>
     </PropertyGroup>
 
+    <ItemGroup>
+      <PackageReference Include="System.Data.SqlClient" Version="4.8.3" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Remove="PricingQuery.SQL" />
+      <EmbeddedResource Include="BomQuery.SQL" />
+      <None Remove="MainQuery.SQL" />
+      <EmbeddedResource Include="MainQuery.SQL" />
+    </ItemGroup>
+
 </Project>

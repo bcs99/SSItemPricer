@@ -38,16 +38,28 @@
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Item Number" Binding="{Binding ItemNumber}" />
                 <DataGridTextColumn Header="Item Description" Binding="{Binding ItemName}" />
+                <!-- <DataGridCheckBoxColumn Header="Diff" Binding="{Binding Diff, Mode=OneWay}"/> -->
                 <DataGridCheckBoxColumn Header="BOM" Binding="{Binding UseBOM}" />
+                <DataGridCheckBoxColumn Header="X BOM" Binding="{Binding BomPrice.UseBOM}"/>
                 <DataGridCheckBoxColumn Header="Discontinued" Binding="{Binding Discontinued}" />
+                <DataGridCheckBoxColumn Header="X Discontinued" Binding="{Binding BomPrice.Discontinued}"/>
                 <DataGridTextColumn Header="Status" Binding="{Binding Status}" />
+                <DataGridTextColumn Header="X Status" Binding="{Binding BomPrice.Status}"/>
                 <DataGridTextColumn Header="Parts" Binding="{Binding PartsCost, StringFormat=\{0:0.0000\}}"
                                     ElementStyle="{StaticResource RightCell}" />
                 <DataGridTextColumn Header="Labor" Binding="{Binding LaborCost, StringFormat=\{0:0.0000\}}"
                                     ElementStyle="{StaticResource RightCell}" />
+                <DataGridTextColumn Header="X Labor" Binding="{Binding BomPrice.Labor, StringFormat=\{0:0.0000\}}"
+                                    ElementStyle="{StaticResource RightCell}" />
                 <DataGridTextColumn Header="Price" Binding="{Binding BuyUnitPrice, StringFormat=\{0:0.0000\}}"
                                     ElementStyle="{StaticResource RightCell}" />
+                <DataGridTextColumn Header="X Price" Binding="{Binding BomPrice.Price, StringFormat=\{0:0.0000\}}"
+                                    ElementStyle="{StaticResource RightCell}" />
                 <DataGridCheckBoxColumn Header="Calculated" Binding="{Binding Calculated}" />
+                <DataGridTextColumn Header="Setup Cost" Binding="{Binding SetupCost, StringFormat=\{0:0.00\}}" />
+                <DataGridTextColumn Header="X Setup Cost" Binding="{Binding BomPrice.SetupCost, StringFormat=\{0:0.00\}}" />
+                <DataGridTextColumn Header="Piece Cost" Binding="{Binding PieceCost, StringFormat=\{0:0.00\}}" />
+                <DataGridTextColumn Header="X Piece Cost" Binding="{Binding BomPrice.PieceCost, StringFormat=\{0:0.00\}}" />
                 <DataGridTextColumn Header="Notes" Binding="{Binding Notes}" />
             </DataGrid.Columns>
         </DataGrid>

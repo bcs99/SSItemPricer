@@ -1,4 +1,4 @@
-﻿<Window x:Class="SSItemPricer2.MainWindow"
+﻿<Window x:Class="SSItemPricer2.BomWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -6,45 +6,40 @@
         xmlns:local="clr-namespace:SSItemPricer2"
         mc:Ignorable="d"
         Title="SS Item Pricer (ver 2)"
-        Height="800" Width="1200">
+        SizeToContent="Height"
+        WindowStartupLocation="CenterOwner"
+        MinHeight="250"
+        Width="1000">
 
     <Window.DataContext>
-        <local:MainWindowVm x:Name="ViewModel" />
+        <local:BomWindowVm x:Name="ViewModel" />
     </Window.DataContext>
 
-    <Window.Resources>
-        <Style x:Key="LeftCell" TargetType="{x:Type TextBlock}">
-            <Setter Property="Padding" Value="4 2" />
-        </Style>
-        <Style x:Key="CenterCell" TargetType="{x:Type TextBlock}" BasedOn="{StaticResource LeftCell}">
-            <Setter Property="HorizontalAlignment" Value="Stretch" />
-            <Setter Property="TextAlignment" Value="Center" />
-        </Style>
-        <Style x:Key="RightCell" TargetType="{x:Type TextBlock}" BasedOn="{StaticResource LeftCell}">
-            <Setter Property="HorizontalAlignment" Value="Stretch" />
-            <Setter Property="TextAlignment" Value="Right" />
-        </Style>
-    </Window.Resources>
+    <Window.CommandBindings>
+        <CommandBinding Command="Close" Executed="Window_OnClose" />
+    </Window.CommandBindings>
+
+    <Window.InputBindings>
+        <KeyBinding Command="Close" Key="Escape" />
+        <KeyBinding Command="Close" Key="W" Modifiers="Control" />
+    </Window.InputBindings>
 
     <DockPanel>
-        <StackPanel DockPanel.Dock="Top" 
-                    Orientation="Horizontal" Margin="5">
-            <Label Content="Search Item Number" />
-            <TextBox x:Name="SearchBox" 
-                     Width="200"
-                     VerticalContentAlignment="Center"
-                     PreviewKeyDown="SearchBox_OnPreviewKeyDown" 
-                     />
-        </StackPanel>
-        <StatusBar DockPanel.Dock="Bottom">
-            <StatusBarItem x:Name="StatusBarItem" 
-                           Content=" "/>
+        <StatusBar DockPanel.Dock="Top">
+            <StatusBarItem x:Name="StatusBarItem" HorizontalAlignment="Right">
+                <StatusBarItem.Content>
+                    <TextBlock FontWeight="Bold" FontSize="16">
+                        <Run>$</Run>
+                        <Run Text="{Binding Total}" />
+                    </TextBlock>
+                </StatusBarItem.Content>
+            </StatusBarItem>
         </StatusBar>
         <DataGrid x:Name="DataGrid"
                   ItemsSource="{Binding DataView}"
                   AutoGeneratingColumn="DataGrid_OnAutoGeneratingColumn"
-                  IsReadOnly="True"
-                  PreviewTextInput="DataGrid_OnPreviewTextInput">
+                  IsReadOnly="True">
         </DataGrid>
     </DockPanel>
+
 </Window>

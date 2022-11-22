@@ -7,9 +7,11 @@
                  CAST(IIF(IV.UseBOM = 0, IV.BuyUnitPrice, 0) AS MONEY),
                  CAST(0 AS MONEY),
                  0
-          FROM dbo.tblItem I
+          FROM dbo.tblBOMItems BI
+                   JOIN dbo.tblItem I ON I.ItemNumber = BI.ItemID
                    JOIN dbo.tblItemVendor IV ON IV.ItemID = I.ItemNumber AND VendorPriority = 1
                    JOIN dbo.tblECOStatus S ON S.ECOStatusID = I.ECOStatusID
+          WHERE BI.BOMID = CAST(@BOMID AS INT)
           UNION ALL
           SELECT CTE.RootId,
                  CAST(CTE.ItemQuantity * BI.ItemQuantity AS DECIMAL(10, 3)),
@@ -26,18 +28,18 @@
           WHERE CTE.UseBOM = 1
             AND BI.ItemQuantity != 0
             AND CTE.Level < 6)
-SELECT I.ItemNumber              AS [Item Number],
-       I.ItemName                AS [Item Description],
-       BI.ItemQuantity           AS Quantity,
-       S.Price - S.Labor         AS Parts,
-       S.Labor                   AS Labor,
-       S.Price * BI.ItemQuantity AS Price,
-       IV.SetupCost              AS [Setup Cost],
-       IV.PieceCost              AS [Piece Cost],
-       IV.UseBOM                 AS [Is BOM],
-       I.Discontinued            AS Discontinued,
-       ES.Description            AS Status,
-       V.VendorName              AS [Vendor Name]
+SELECT I.ItemNumber                                                      AS [Item Number],
+       IIF(I.ItemMarketingName IS NULL, I.ItemName, I.ItemMarketingName) AS [Item Description],
+       BI.ItemQuantity                                                   AS Quantity,
+       S.Price - S.Labor                                                 AS Parts,
+       S.Labor                                                           AS Labor,
+       CAST(S.Price * BI.ItemQuantity AS MONEY)                          AS Price,
+       IV.SetupCost                                                      AS [Setup Cost],
+       IV.PieceCost                                                      AS [Piece Cost],
+       IV.UseBOM                                                         AS [Is BOM],
+       I.Discontinued                                                    AS Discontinued,
+       ES.Description                                                    AS Status,
+       V.VendorName                                                      AS [Vendor Name]
 FROM dbo.tblBOMItems BI
          JOIN dbo.tblItem I ON I.ItemNumber = BI.ItemID
          JOIN dbo.tblItemVendor IV on BI.ItemID = IV.ItemID
@@ -49,5 +51,5 @@ FROM dbo.tblBOMItems BI
                FROM CTE
                GROUP BY RootId) AS S ON RootId = I.ItemNumber
 WHERE IV.VendorPriority = 1
-  AND BI.BOMID = ?
+  AND BI.BOMID = CAST(@BOMID AS INT)
 ORDER BY I.ItemNumber

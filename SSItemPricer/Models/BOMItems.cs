@@ -17,6 +17,8 @@
             this.Calculated = source.Calculated;
             this.ECOStatusID = source.ECOStatusID;
             this.Status = source.Status;
+            this.SetupCost = source.SetupCost;
+            this.PieceCost = source.PieceCost;
             this.Notes = source.Notes;
         }
     }

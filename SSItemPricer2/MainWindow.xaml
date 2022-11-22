@@ -4,9 +4,35 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SSItemPricer2"
+        xmlns:system="clr-namespace:System;assembly=System.Runtime"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
-    <Grid>
+        Title="SS Item Pricer (ver 2)"
+        Height="800" Width="1200">
+    
+    <Window.DataContext>
+        <local:MainWindowVm x:Name="ViewModel" />
+    </Window.DataContext>
 
-    </Grid>
+    <DockPanel>
+        <StackPanel DockPanel.Dock="Top" 
+                    Orientation="Horizontal" Margin="5">
+            <Label Content="Search Item Number" />
+            <TextBox x:Name="SearchBox" 
+                     Width="200"
+                     VerticalContentAlignment="Center"
+                     PreviewKeyDown="SearchBox_OnPreviewKeyDown" 
+                     />
+        </StackPanel>
+        <StatusBar DockPanel.Dock="Bottom">
+            <StatusBarItem x:Name="StatusBarItem" 
+                           Content="{Binding DataView.Count}"/>
+        </StatusBar>
+        <DataGrid x:Name="DataGrid"
+                  ItemsSource="{Binding DataView}"
+                  IsReadOnly="True"
+                  AutoGeneratingColumn="DataGrid_OnAutoGeneratingColumn"
+                  PreviewKeyDown="DataGrid_OnPreviewKeyDown"
+                  PreviewTextInput="DataGrid_OnPreviewTextInput">
+        </DataGrid>
+    </DockPanel>
 </Window>

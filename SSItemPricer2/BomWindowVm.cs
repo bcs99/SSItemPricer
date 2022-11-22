@@ -1,48 +1,51 @@
-﻿using System.Data;
-using System.Data.SqlClient;
+﻿using System.ComponentModel;
+using System.Data;
 using System.Linq;
+using System.Runtime.CompilerServices;
+using SSItemPricer2.Annotations;
 
 namespace SSItemPricer2;
 
-public class MainWindowVm
+public class BomWindowVm : INotifyPropertyChanged
 {
-    private const string ConnectionString = "Server=10.0.0.25,1400; Database=MIS; Uid=web123; Pwd=web123";
+    private DataView _dataView = new DataView();
+    private decimal _total;
 
-    private static readonly string PricingQuery = GetEmbeddedResourceFile("PricingQuery.SQL");
-    private static readonly string BomPricingQuery = GetEmbeddedResourceFile("BomPricingQuery.SQL");
-    
-    public DataView DataView { get; set; }
-
-    public MainWindowVm()
+    public decimal Total
     {
-        using var conn = new SqlConnection(ConnectionString);
-
-        conn.Open();
-
-        var dataAdapter = new SqlDataAdapter(PricingQuery, conn);
-        var dataTable = new DataTable();
-
-        dataAdapter.Fill(dataTable);
-
-        DataView = dataTable.DefaultView;
+        get => _total;
+        set
+        {
+            if (value == _total) return;
+            _total = value;
+            OnPropertyChanged();
+        }
     }
 
-    private static string GetEmbeddedResourceFile(string filename)
+    public DataView DataView
     {
-        var assembly = System.Reflection.Assembly.GetExecutingAssembly();
-
-        if (assembly.GetManifestResourceNames().FirstOrDefault(r => r.EndsWith(filename)) is { } resource)
+        get => _dataView;
+        set
         {
-            using var resourceStream = assembly.GetManifestResourceStream(resource);
-
-            if (resourceStream != null)
-            {
-                using var reader = new System.IO.StreamReader(resourceStream);
-
-                return reader.ReadToEnd();
-            }
+            if (value.Equals(_dataView)) return;
+            _dataView = value;
+            OnPropertyChanged();
+            _total = GetTotal();
+            OnPropertyChanged(nameof(Total));
         }
+    }
 
-        return "";
+    private decimal GetTotal()
+    {
+        return _dataView.Cast<DataRowView>()
+            .Sum(rowView => decimal.Parse(rowView.Row["Price"].ToString()));
+    }
+
+    public event PropertyChangedEventHandler? PropertyChanged;
+
+    [NotifyPropertyChangedInvocator]
+    protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
+    {
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
 }

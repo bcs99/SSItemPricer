@@ -43,6 +43,8 @@
                 <DataGridTextColumn Header="Quantity" Binding="{Binding ItemQuantity}" />
                 <DataGridTextColumn Header="Total" Binding="{Binding Total, StringFormat=\{0:0.0000\}}" 
                                     ElementStyle="{StaticResource RightCell}" />
+                <DataGridTextColumn Header="Setup Cost" Binding="{Binding SetupCost, StringFormat=\{0:0.00\}}" />
+                <DataGridTextColumn Header="Piece Cost" Binding="{Binding PieceCost, StringFormat=\{0:0.00\}}" />
                 <DataGridTextColumn Header="Notes" Binding="{Binding Notes}" />
             </DataGrid.Columns>
         </DataGrid>

@@ -7,5 +7,7 @@
         public bool UseBOM { get; set; }
         public decimal BuyUnitPrice { get; set; }
         public string VendorName { get; set; }
+        public decimal SetupCost { get; set; }
+        public decimal PieceCost { get; set; }
     }
 }
