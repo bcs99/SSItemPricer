@@ -14,6 +14,9 @@
     </Window.DataContext>
 
     <DockPanel>
+        <Menu DockPanel.Dock="Top">
+            <MenuItem Header="_Export" Click="Export_OnClick"/>
+        </Menu>
         <StackPanel DockPanel.Dock="Top" 
                     Orientation="Horizontal" Margin="5">
             <Label Content="Search Item Number" />
@@ -32,6 +35,7 @@
                   IsReadOnly="True"
                   AutoGeneratingColumn="DataGrid_OnAutoGeneratingColumn"
                   PreviewKeyDown="DataGrid_OnPreviewKeyDown"
+                  PreviewMouseDoubleClick="DataGrid_OnPreviewMouseDoubleClick"  
                   PreviewTextInput="DataGrid_OnPreviewTextInput">
         </DataGrid>
     </DockPanel>

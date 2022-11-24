@@ -25,6 +25,9 @@
     </Window.InputBindings>
 
     <DockPanel>
+        <Menu DockPanel.Dock="Top">
+            <MenuItem Header="_Export" Click="Export_OnClick"/>
+        </Menu>
         <StatusBar DockPanel.Dock="Top">
             <StatusBarItem x:Name="StatusBarItem" HorizontalAlignment="Right">
                 <StatusBarItem.Content>
@@ -38,6 +41,8 @@
         <DataGrid x:Name="DataGrid"
                   ItemsSource="{Binding DataView}"
                   AutoGeneratingColumn="DataGrid_OnAutoGeneratingColumn"
+                  PreviewKeyDown="DataGrid_OnPreviewKeyDown"
+                  PreviewMouseDoubleClick="DataGrid_OnPreviewMouseDoubleClick"  
                   IsReadOnly="True">
         </DataGrid>
     </DockPanel>

@@ -5,7 +5,7 @@
         <TargetFramework>net6.0-windows</TargetFramework>
         <Nullable>enable</Nullable>
         <UseWPF>true</UseWPF>
-        <AssemblyVersion>2.0.0.1</AssemblyVersion>
+        <AssemblyVersion></AssemblyVersion>
     </PropertyGroup>
 
     <ItemGroup>
@@ -18,5 +18,14 @@
       <None Remove="MainQuery.SQL" />
       <EmbeddedResource Include="MainQuery.SQL" />
     </ItemGroup>
+
+	<Target Name="SetAssemblyVersion" BeforeTargets="BeforeCompile">
+		<FormatVersion Version="$(ApplicationVersion)" Revision="$(ApplicationRevision)">
+			<Output PropertyName="AssemblyVersion" TaskParameter="OutputVersion" />
+		</FormatVersion>
+		<FormatVersion Version="$(ApplicationVersion)" Revision="$(ApplicationRevision)">
+			<Output PropertyName="FileVersion" TaskParameter="OutputVersion" />
+		</FormatVersion>
+	</Target>
 
 </Project>

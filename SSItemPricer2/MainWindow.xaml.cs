@@ -1,4 +1,6 @@
-﻿using System.Data;
+﻿using System;
+using System.Data;
+using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -35,7 +37,7 @@ namespace SSItemPricer2
             DataGrid.Focus();
         }
 
-        private void DataGrid_OnAutoGeneratingColumn(object? sender, DataGridAutoGeneratingColumnEventArgs e) 
+        private void DataGrid_OnAutoGeneratingColumn(object? sender, DataGridAutoGeneratingColumnEventArgs e)
             => App.AutoGeneratingColumn(sender, e);
 
         private void DataGrid_OnPreviewTextInput(object sender, TextCompositionEventArgs e)
@@ -51,15 +53,18 @@ namespace SSItemPricer2
 
         private void DataGrid_OnPreviewKeyDown(object sender, KeyEventArgs e)
         {
-            if (e.Key != Key.Enter || DataGrid.SelectedItem is not DataRowView dataRowView) return;
+            if (e.Key == Key.Enter && Keyboard.Modifiers == ModifierKeys.Control)
+                e.Handled = App.ShowBomWindow(DataGrid, this);
+        }
 
-            e.Handled = true;
-            
-            new BomWindow(dataRowView["Item Number"].ToString())
-            {
-                Owner = this,
-                Title = $"{dataRowView["Item Number"]} {dataRowView["Item Description"]}"
-            }.Show();
+        private void DataGrid_OnPreviewMouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            e.Handled = App.ShowBomWindow(DataGrid, this);
+        }
+
+        private void Export_OnClick(object sender, RoutedEventArgs e)
+        {
+            App.ExportTable(ViewModel.DataView.Table!, this);
         }
     }
 }
