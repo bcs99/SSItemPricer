@@ -35,7 +35,8 @@ SELECT I.ItemNumber                                                      AS [Ite
        IV.UseBOM                                                         AS [Is BOM],
        I.Discontinued                                                    AS Discontinued,
        ES.Description                                                    AS Status,
-       V.VendorName                                                      AS [Vendor Name]
+       V.VendorName                                                      AS [Vendor Name],
+       IV.VendorItemNumber                                               AS [Vendor Item]
 FROM dbo.tblItem I
          FULL JOIN dbo.tblItemVendor IV on I.ItemNumber = IV.ItemID AND IV.VendorPriority = 1
          FULL JOIN dbo.tblVendor V ON IV.VendorID = V.VendorID

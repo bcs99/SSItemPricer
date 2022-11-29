@@ -4,6 +4,7 @@ using System.Data.SqlClient;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using Microsoft.Win32;
@@ -126,6 +127,8 @@ namespace SSItemPricer2
         {
             if (Convert.IsDBNull(cell) || cell?.ToString() is not {} value)
                 return string.Empty;
+
+            value = Regex.Replace(value, @"\t|\r|\n", "");
 
             return value.Contains(',') ? $"\"{value}\"" : value;
         }
