@@ -101,9 +101,9 @@ namespace SSItemPricer2
             var dialog = new SaveFileDialog()
             {
                 CheckPathExists = true,
-                DefaultExt = ".csv",
-                Filter = "Comma Separated Values (*.csv)|*.csv",
-                FileName = "Untitled.csv"
+                DefaultExt = ".tsv",
+                Filter = "Tab Separated Values (*.tsv)|*.tsv",
+                FileName = "Untitled.tsv"
             };
 
             if (dialog.ShowDialog(window) != true) 
@@ -111,12 +111,12 @@ namespace SSItemPricer2
 
             var streamWriter = new StreamWriter(dialog.FileName, false);
 
-            streamWriter.Write(string.Join(',', table.Columns.Cast<DataColumn>().Select(c => c.ColumnName)));
+            streamWriter.Write(string.Join('\t', table.Columns.Cast<DataColumn>().Select(c => c.ColumnName)));
             streamWriter.Write(streamWriter.NewLine);
 
             foreach (DataRow row in table.Rows)
             {
-                streamWriter.Write(string.Join(',', row.ItemArray.Select(GetCellValue)));
+                streamWriter.Write(string.Join('\t', row.ItemArray.Select(GetCellValue)));
                 streamWriter.Write(streamWriter.NewLine);
             }
 
@@ -128,9 +128,7 @@ namespace SSItemPricer2
             if (Convert.IsDBNull(cell) || cell?.ToString() is not {} value)
                 return string.Empty;
 
-            value = Regex.Replace(value, @"\t|\r|\n", "");
-
-            return value.Contains(',') ? $"\"{value}\"" : value;
+            return Regex.Replace(value, @"\t|\r|\n", " ");
         }
     }
 }
