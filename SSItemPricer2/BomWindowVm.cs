@@ -38,7 +38,7 @@ public class BomWindowVm : INotifyPropertyChanged
     private decimal GetTotal()
     {
         return _dataView.Cast<DataRowView>()
-            .Sum(rowView => decimal.Parse(rowView.Row["Price"].ToString()));
+            .Sum(rowView => decimal.Parse(rowView.Row["Price"].ToString()!));
     }
 
     public event PropertyChangedEventHandler? PropertyChanged;

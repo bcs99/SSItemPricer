@@ -25,22 +25,24 @@
             AND CTE.UseBOM = 1
             AND BI.ItemQuantity != 0
             AND CTE.Level < 6)
-SELECT I.ItemNumber                                                      AS [Item Number],
-       IIF(I.ItemMarketingName IS NULL, I.ItemName, I.ItemMarketingName) AS [Item Description],
-       S.Price - S.Labor                                                 AS Parts,
-       S.Labor                                                           AS Labor,
-       S.Price                                                           AS Price,
-       IV.SetupCost                                                      AS [Setup Cost],
-       IV.PieceCost                                                      AS [Piece Cost],
-       IV.UseBOM                                                         AS [Is BOM],
-       I.Discontinued                                                    AS Discontinued,
-       ES.Description                                                    AS Status,
-       V.VendorName                                                      AS [Vendor Name],
-       IV.VendorItemNumber                                               AS [Vendor Item]
+SELECT I.ItemNumber                                                                 AS [Item Number],
+       IIF(I.ItemMarketingName IS NULL, CONCAT('*', ItemName), I.ItemMarketingName) AS [Item Description],
+       S.Price - S.Labor                                                            AS Parts,
+       S.Labor                                                                      AS Labor,
+       S.Price                                                                      AS Price,
+       IV.SetupCost                                                                 AS [Setup Cost],
+       IV.PieceCost                                                                 AS [Piece Cost],
+       IV.UseBOM                                                                    AS [Is BOM],
+       I.Discontinued                                                               AS Discontinued,
+       ES.Description                                                               AS Status,
+       V.VendorName                                                                 AS [Vendor Name],
+       IV.VendorItemNumber                                                          AS [Vendor Item],
+       SC.CategoryName                                                              AS Category
 FROM dbo.tblItem I
          FULL JOIN dbo.tblItemVendor IV on I.ItemNumber = IV.ItemID AND IV.VendorPriority = 1
          FULL JOIN dbo.tblVendor V ON IV.VendorID = V.VendorID
          JOIN dbo.tblECOStatus ES on I.ECOStatusID = ES.ECOStatusID
+         FULL JOIN dbo.tblSubCat01 SC on I.Category1ID = SC.CatID
          JOIN (SELECT RootId,
                       SUM(Labor) AS Labor,
                       SUM(Price) AS Price

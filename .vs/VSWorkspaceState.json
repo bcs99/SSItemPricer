@@ -1,7 +1,8 @@
 {
   "ExpandedNodes": [
-    ""
+    "",
+    "\\SSItemPricer2"
   ],
-  "SelectedNode": "\\SSItemPricer.sln",
+  "SelectedNode": "\\SSItemPricer2\\SSItemPricer2.csproj",
   "PreviewInSolutionExplorer": false
 }
