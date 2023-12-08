@@ -25,19 +25,19 @@
             AND CTE.UseBOM = 1
             AND BI.ItemQuantity != 0
             AND CTE.Level < 6)
-SELECT I.ItemNumber                                                                 AS [Item Number],
-       IIF(I.ItemMarketingName IS NULL, CONCAT('*', ItemName), I.ItemMarketingName) AS [Item Description],
-       S.Price - S.Labor                                                            AS Parts,
-       S.Labor                                                                      AS Labor,
-       S.Price                                                                      AS Price,
-       IV.SetupCost                                                                 AS [Setup Cost],
-       IV.PieceCost                                                                 AS [Piece Cost],
-       IV.UseBOM                                                                    AS [Is BOM],
-       I.Discontinued                                                               AS Discontinued,
-       ES.Description                                                               AS Status,
-       V.VendorName                                                                 AS [Vendor Name],
-       IV.VendorItemNumber                                                          AS [Vendor Item],
-       SC.CategoryName                                                              AS Category
+SELECT I.ItemNumber                          AS [Item Number],
+       ISNULL(I.ItemMarketingName, ItemName) AS [Item Description],
+       ISNULL(S.Price - S.Labor, 0)          AS Parts,
+       ISNULL(S.Labor, 0)                    AS Labor,
+       ISNULL(S.Price, 0)                    AS Price,
+       ISNULL(IV.SetupCost, 0)               AS [Setup Cost],
+       ISNULL(IV.PieceCost, 0)               AS [Piece Cost],
+       ISNULL(IV.UseBOM, 0)                  AS [Is BOM],
+       ISNULL(I.Discontinued, 0)             AS Discontinued,
+       ISNULL(ES.Description, '-')           AS Status,
+       ISNULL(V.VendorName, '-')             AS [Vendor Name],
+       ISNULL(IV.VendorItemNumber, '-')      AS [Vendor Item],
+       ISNULL(SC.CategoryName, '-')          AS Category
 FROM dbo.tblItem I
          FULL JOIN dbo.tblItemVendor IV on I.ItemNumber = IV.ItemID AND IV.VendorPriority = 1
          FULL JOIN dbo.tblVendor V ON IV.VendorID = V.VendorID
