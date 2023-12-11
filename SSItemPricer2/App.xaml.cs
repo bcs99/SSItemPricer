@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Data;
 using System.Data.SqlClient;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -8,6 +9,7 @@ using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using Microsoft.Win32;
+using ClosedXML.Excel;
 
 namespace SSItemPricer2
 {
@@ -101,34 +103,43 @@ namespace SSItemPricer2
             var dialog = new SaveFileDialog()
             {
                 CheckPathExists = true,
-                DefaultExt = ".tsv",
-                Filter = "Tab Separated Values (*.tsv)|*.tsv",
-                FileName = "Untitled.tsv"
+                DefaultExt = ".xlsx",
+                Filter = "Excel (*.xlsx)|*.xlsx",
+                FileName = $"SS Item Pricing ({DateTime.Now:yyyy-M-d}).xlsx"
             };
 
-            if (dialog.ShowDialog(window) != true) 
+            if (dialog.ShowDialog(window) != true)
                 return;
 
-            var streamWriter = new StreamWriter(dialog.FileName, false);
-
-            streamWriter.Write(string.Join('\t', table.Columns.Cast<DataColumn>().Select(c => c.ColumnName)));
-            streamWriter.Write(streamWriter.NewLine);
-
-            foreach (DataRow row in table.Rows)
+            using (var workbook = new XLWorkbook())
             {
-                streamWriter.Write(string.Join('\t', row.ItemArray.Select(GetCellValue)));
-                streamWriter.Write(streamWriter.NewLine);
+                var worksheet = workbook.Worksheets.Add("Sheet1");
+                var headings = table.Columns.Cast<DataColumn>().Select(c => c.ColumnName).ToArray();
+
+                for (var i = 0; i < headings.Length; i++)
+                {
+                    var xlCell = worksheet.Cell(1, i + 1);
+
+                    xlCell.Value = headings[i];
+                    xlCell.Style.Font.Bold = true;
+                }
+
+                worksheet.SheetView.FreezeRows(1);
+                worksheet.Cell(2, 1).InsertData(table);
+
+                foreach (var xlColumn in worksheet.Columns())
+                {
+                    if (new[] { "Parts", "Labor", "Price", "Setup Cost", "Piece Cost" }
+                        .Contains(xlColumn.Cell(1).Value.ToString()))
+                        xlColumn.Cells().Style.NumberFormat.SetFormat(
+                            @"_(""$""* #,##0.00_);_(""$""* \(#,##0.00\);_(""$""* ""-""??_);_(@_)");
+                    xlColumn.AdjustToContents();
+                }
+
+                workbook.SaveAs(dialog.FileName);
             }
 
-            streamWriter.Close();
-        }
-
-        private static string GetCellValue(object? cell)
-        {
-            if (Convert.IsDBNull(cell) || cell?.ToString() is not {} value)
-                return string.Empty;
-
-            return Regex.Replace(value, @"\t|\r|\n", " ");
+            Process.Start(new ProcessStartInfo{FileName = dialog.FileName, UseShellExecute = true});
         }
     }
 }
