@@ -16,6 +16,7 @@
     <DockPanel>
         <Menu DockPanel.Dock="Top">
             <MenuItem Header="_Export" Click="Export_OnClick"/>
+            <MenuItem Header="_Import Catalog Items" Click="Import_CatalogItems"/>
         </Menu>
         <StackPanel DockPanel.Dock="Top" 
                     Orientation="Horizontal" Margin="5">
@@ -23,11 +24,12 @@
             <TextBox x:Name="SearchBox" 
                      Width="200"
                      VerticalContentAlignment="Center"
-                     PreviewKeyDown="SearchBox_OnPreviewKeyDown" 
-                     />
+                     PreviewKeyDown="SearchBox_OnPreviewKeyDown" />
         </StackPanel>
         <StatusBar DockPanel.Dock="Bottom">
             <StatusBarItem x:Name="StatusBarItem" Content="{Binding DataView.Count}"/>
+            <Separator/>
+            <StatusBarItem Content="{Binding Message, UpdateSourceTrigger=PropertyChanged}"/>
             <StatusBarItem x:Name="Version" Content="{Binding Version}" HorizontalAlignment="Right" />
         </StatusBar>
         <DataGrid x:Name="DataGrid"

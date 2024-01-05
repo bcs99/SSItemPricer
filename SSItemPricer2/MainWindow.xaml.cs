@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Data;
-using System.IO;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using Microsoft.Win32;
 
 namespace SSItemPricer2
 {
@@ -65,6 +63,36 @@ namespace SSItemPricer2
         private void Export_OnClick(object sender, RoutedEventArgs e)
         {
             App.ExportTable(ViewModel.DataView.Table!, this);
+        }
+
+        private async void Import_CatalogItems(object sender, RoutedEventArgs e)
+        {
+            ViewModel.Message = "Importing catalog items...";
+
+            await SetCatalogItemsAsync();
+
+            ViewModel.Message = string.Empty;
+            
+            MessageBox.Show("Import completed.");
+        }
+
+        private async Task SetCatalogItemsAsync()
+        {
+            CatalogItems? catalogItems = null;
+
+            var action = () => { catalogItems = new CatalogItems(); };
+
+            try
+            {
+                await Task.Run(action);
+
+                foreach (var itemNumber in catalogItems!.ItemNumbers)
+                    ViewModel.ItemIsInCatalog(itemNumber);
+            }
+            catch (Exception exception)
+            {
+                MessageBox.Show(exception.Message, "Import Catalog Items", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
     }
 }

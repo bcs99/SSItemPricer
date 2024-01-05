@@ -1,31 +1,23 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-
-    <PropertyGroup>
-        <OutputType>WinExe</OutputType>
-        <TargetFramework>net6.0-windows</TargetFramework>
-        <Nullable>enable</Nullable>
-        <UseWPF>true</UseWPF>
-    </PropertyGroup>
-
-    <ItemGroup>
-      <PackageReference Include="ClosedXML" Version="0.102.1" />
-      <PackageReference Include="System.Data.SqlClient" Version="4.8.5" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <None Remove="PricingQuery.SQL" />
-      <EmbeddedResource Include="BomQuery.SQL" />
-      <None Remove="MainQuery.SQL" />
-      <EmbeddedResource Include="MainQuery.SQL" />
-    </ItemGroup>
-
-	<Target Name="SetAssemblyVersion" BeforeTargets="BeforeCompile">
-		<FormatVersion Version="$(ApplicationVersion)" Revision="$(ApplicationRevision)">
-			<Output PropertyName="AssemblyVersion" TaskParameter="OutputVersion" />
-		</FormatVersion>
-		<FormatVersion Version="$(ApplicationVersion)" Revision="$(ApplicationRevision)">
-			<Output PropertyName="FileVersion" TaskParameter="OutputVersion" />
-		</FormatVersion>
-	</Target>
-
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net6.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <UseWPF>true</UseWPF>
+    <InstallDir>\\FILESERVER\Spartek\Documentation Department\_Applications\SSItemPricer2</InstallDir>
+    <GenerateAssemblyVersionAttribute>false</GenerateAssemblyVersionAttribute>
+    <GenerateAssemblyInfo>False</GenerateAssemblyInfo>
+    <AssemblyVersion>1.0.1.3</AssemblyVersion>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="ClosedXML" Version="0.102.1" />
+    <PackageReference Include="PdfPig" Version="0.1.8" />
+    <PackageReference Include="System.Data.SqlClient" Version="4.8.5" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Remove="PricingQuery.SQL" />
+    <EmbeddedResource Include="BomQuery.SQL" />
+    <None Remove="MainQuery.SQL" />
+    <EmbeddedResource Include="MainQuery.SQL" />
+  </ItemGroup>
 </Project>

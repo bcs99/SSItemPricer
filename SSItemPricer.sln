@@ -1,8 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SSItemPricer", "SSItemPricer\SSItemPricer.csproj", "{15F7C86D-3CCB-4F3F-9BBB-2AB8356B3827}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SSItemPricer2", "SSItemPricer2\SSItemPricer2.csproj", "{9BB57295-C97A-4881-989F-037784E55CC8}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SSItemPricer", "SSItemPricer\SSItemPricer.csproj", "{359C40B1-C57A-416C-8D75-B17304DB34EA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -10,13 +8,9 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{15F7C86D-3CCB-4F3F-9BBB-2AB8356B3827}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{15F7C86D-3CCB-4F3F-9BBB-2AB8356B3827}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{15F7C86D-3CCB-4F3F-9BBB-2AB8356B3827}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{15F7C86D-3CCB-4F3F-9BBB-2AB8356B3827}.Release|Any CPU.Build.0 = Release|Any CPU
-		{9BB57295-C97A-4881-989F-037784E55CC8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{9BB57295-C97A-4881-989F-037784E55CC8}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{9BB57295-C97A-4881-989F-037784E55CC8}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{9BB57295-C97A-4881-989F-037784E55CC8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{359C40B1-C57A-416C-8D75-B17304DB34EA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{359C40B1-C57A-416C-8D75-B17304DB34EA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{359C40B1-C57A-416C-8D75-B17304DB34EA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{359C40B1-C57A-416C-8D75-B17304DB34EA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

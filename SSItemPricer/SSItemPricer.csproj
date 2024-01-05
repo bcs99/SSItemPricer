@@ -1,20 +1,31 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-
-    <PropertyGroup>
-        <OutputType>WinExe</OutputType>
-        <TargetFramework>net5.0-windows</TargetFramework>
-        <UseWPF>true</UseWPF>
-        <AssemblyVersion>1.0.0.5</AssemblyVersion>
-    </PropertyGroup>
-
-    <ItemGroup>
-      <PackageReference Include="System.Data.SqlClient" Version="4.8.5" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <None Update="PricingQuery.SQL">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      </None>
-    </ItemGroup>
-
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net7.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <UseWPF>true</UseWPF>
+    <AssemblyVersion>1.0.2.4</AssemblyVersion>
+    <InstallDir>\\FILESERVER\Spartek\Documentation Department\_Applications\SSItemPricer</InstallDir>
+  </PropertyGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="BomQuery.SQL" />
+    <EmbeddedResource Include="MainQuery.SQL" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="ClosedXML" Version="0.102.2" />
+    <PackageReference Include="PdfPig" Version="0.1.8" />
+    <PackageReference Include="System.Data.SqlClient" Version="4.8.5" />
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="BomWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <XamlRuntime>Wpf</XamlRuntime>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="MainWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <XamlRuntime>Wpf</XamlRuntime>
+      <SubType>Designer</SubType>
+    </Page>
+  </ItemGroup>
 </Project>

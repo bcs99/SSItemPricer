@@ -5,64 +5,42 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SSItemPricer"
         mc:Ignorable="d"
-        SizeToContent="WidthAndHeight"
+        Title="SS Item Pricer"
         WindowStartupLocation="CenterScreen"
-        MaxHeight="650"
-        Title="SS Item Pricer" Height="650" Width="800">
-
+        Loaded="MainWindow_OnLoaded"
+        Height="800" 
+        Width="1200">
+    
     <Window.DataContext>
-        <local:ViewModel />
+        <local:MainWindowVm x:Name="ViewModel" />
     </Window.DataContext>
 
     <DockPanel>
         <Menu DockPanel.Dock="Top">
-            <MenuItem Header="Calculate" Click="Calculate_Clicked" />
-            <MenuItem x:Name="CancelBtn" Header="Cancel" Click="Cancel_Clicked" Visibility="Hidden" />
+            <MenuItem Header="_Import Catalog Items" Click="Import_CatalogItems"/>
+            <MenuItem Header="_Export to Excel" Click="Export_OnClick"/>
         </Menu>
+        <StackPanel DockPanel.Dock="Top" 
+                    Orientation="Horizontal" Margin="5">
+            <Label Content="Search Item Number" />
+            <TextBox x:Name="SearchBox" 
+                     Width="200"
+                     VerticalContentAlignment="Center"
+                     PreviewKeyDown="SearchBox_OnPreviewKeyDown" />
+        </StackPanel>
         <StatusBar DockPanel.Dock="Bottom">
-            <StatusBarItem x:Name="StatusBarItem" Content="..." />
+            <StatusBarItem x:Name="StatusBarItem" Content="{Binding DataView.Count}"/>
+            <Separator/>
+            <StatusBarItem Content="{Binding Message, UpdateSourceTrigger=PropertyChanged}"/>
             <StatusBarItem x:Name="Version" Content="{Binding Version}" HorizontalAlignment="Right" />
         </StatusBar>
-        <DataGrid x:Name="DataGrid" ItemsSource="{Binding Items}" AutoGenerateColumns="False" IsReadOnly="True"
-                  PreviewKeyDown="DataGridKeyDown" MouseDoubleClick="DataGridDoubleClick">
-            <DataGrid.Resources>
-                <Style TargetType="{x:Type TextBlock}" x:Key="CenterCell">
-                    <Setter Property="HorizontalAlignment" Value="Stretch" />
-                    <Setter Property="TextAlignment" Value="Center" />
-                </Style>
-                <Style TargetType="{x:Type TextBlock}" x:Key="RightCell">
-                    <Setter Property="HorizontalAlignment" Value="Stretch" />
-                    <Setter Property="TextAlignment" Value="Right" />
-                </Style>
-            </DataGrid.Resources>
-            <DataGrid.Columns>
-                <DataGridTextColumn Header="Item Number" Binding="{Binding ItemNumber}" />
-                <DataGridTextColumn Header="Item Description" Binding="{Binding ItemName}" />
-                <!-- <DataGridCheckBoxColumn Header="Diff" Binding="{Binding Diff, Mode=OneWay}"/> -->
-                <DataGridCheckBoxColumn Header="BOM" Binding="{Binding UseBOM}" />
-                <DataGridCheckBoxColumn Header="X BOM" Binding="{Binding BomPrice.UseBOM}"/>
-                <DataGridCheckBoxColumn Header="Discontinued" Binding="{Binding Discontinued}" />
-                <DataGridCheckBoxColumn Header="X Discontinued" Binding="{Binding BomPrice.Discontinued}"/>
-                <DataGridTextColumn Header="Status" Binding="{Binding Status}" />
-                <DataGridTextColumn Header="X Status" Binding="{Binding BomPrice.Status}"/>
-                <DataGridTextColumn Header="Parts" Binding="{Binding PartsCost, StringFormat=\{0:0.0000\}}"
-                                    ElementStyle="{StaticResource RightCell}" />
-                <DataGridTextColumn Header="Labor" Binding="{Binding LaborCost, StringFormat=\{0:0.0000\}}"
-                                    ElementStyle="{StaticResource RightCell}" />
-                <DataGridTextColumn Header="X Labor" Binding="{Binding BomPrice.Labor, StringFormat=\{0:0.0000\}}"
-                                    ElementStyle="{StaticResource RightCell}" />
-                <DataGridTextColumn Header="Price" Binding="{Binding BuyUnitPrice, StringFormat=\{0:0.0000\}}"
-                                    ElementStyle="{StaticResource RightCell}" />
-                <DataGridTextColumn Header="X Price" Binding="{Binding BomPrice.Price, StringFormat=\{0:0.0000\}}"
-                                    ElementStyle="{StaticResource RightCell}" />
-                <DataGridCheckBoxColumn Header="Calculated" Binding="{Binding Calculated}" />
-                <DataGridTextColumn Header="Setup Cost" Binding="{Binding SetupCost, StringFormat=\{0:0.00\}}" />
-                <DataGridTextColumn Header="X Setup Cost" Binding="{Binding BomPrice.SetupCost, StringFormat=\{0:0.00\}}" />
-                <DataGridTextColumn Header="Piece Cost" Binding="{Binding PieceCost, StringFormat=\{0:0.00\}}" />
-                <DataGridTextColumn Header="X Piece Cost" Binding="{Binding BomPrice.PieceCost, StringFormat=\{0:0.00\}}" />
-                <DataGridTextColumn Header="Notes" Binding="{Binding Notes}" />
-            </DataGrid.Columns>
+        <DataGrid x:Name="DataGrid"
+                  ItemsSource="{Binding DataView}"
+                  IsReadOnly="True"
+                  AutoGeneratingColumn="DataGrid_OnAutoGeneratingColumn"
+                  PreviewKeyDown="DataGrid_OnPreviewKeyDown"
+                  PreviewMouseDoubleClick="DataGrid_OnPreviewMouseDoubleClick"  
+                  PreviewTextInput="DataGrid_OnPreviewTextInput">
         </DataGrid>
     </DockPanel>
-
 </Window>

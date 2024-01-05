@@ -3,50 +3,47 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:SSItemPricer"
+        xmlns:ssItemPricer="clr-namespace:SSItemPricer"
         mc:Ignorable="d"
-        SizeToContent="WidthAndHeight"
-        MaxHeight="600"
-        Title="BomWindow" Height="450" Width="800">
+        Title="SS Item Pricer (ver 2)"
+        SizeToContent="Height"
+        WindowStartupLocation="CenterOwner"
+        MinHeight="250"
+        Width="1000">
 
     <Window.DataContext>
-        <local:BomViewModel />
+        <ssItemPricer:BomWindowVm x:Name="ViewModel" />
     </Window.DataContext>
 
+    <Window.CommandBindings>
+        <CommandBinding Command="Close" Executed="Window_OnClose" />
+    </Window.CommandBindings>
+
+    <Window.InputBindings>
+        <KeyBinding Command="Close" Key="Escape" />
+        <KeyBinding Command="Close" Key="W" Modifiers="Control" />
+    </Window.InputBindings>
+
     <DockPanel>
-        <StatusBar DockPanel.Dock="Bottom">
-            <StatusBarItem x:Name="StatusBarItem" HorizontalAlignment="Right" FontWeight="Bold"/>
+        <Menu DockPanel.Dock="Top">
+            <MenuItem Header="_Export" Click="Export_OnClick"/>
+        </Menu>
+        <StatusBar DockPanel.Dock="Top">
+            <StatusBarItem x:Name="StatusBarItem" HorizontalAlignment="Right">
+                <StatusBarItem.Content>
+                    <TextBlock FontWeight="Bold" FontSize="16">
+                        <Run>$</Run>
+                        <Run Text="{Binding Total}" />
+                    </TextBlock>
+                </StatusBarItem.Content>
+            </StatusBarItem>
         </StatusBar>
-        <DataGrid ItemsSource="{Binding Materials}" AutoGenerateColumns="False" IsReadOnly="True"
-                  PreviewKeyDown="DataGridKeyDown" MouseDoubleClick="DataGridDoubleClick">
-            <DataGrid.Resources>
-                <Style TargetType="{x:Type TextBlock}" x:Key="CenterCell">
-                    <Setter Property="HorizontalAlignment" Value="Stretch" />
-                    <Setter Property="TextAlignment" Value="Center" />
-                </Style>
-                <Style TargetType="{x:Type TextBlock}" x:Key="RightCell">
-                    <Setter Property="HorizontalAlignment" Value="Stretch" />
-                    <Setter Property="TextAlignment" Value="Right" />
-                </Style>
-            </DataGrid.Resources>
-            <DataGrid.Columns>
-                <DataGridTextColumn Header="Item Number" Binding="{Binding ItemNumber}" />
-                <DataGridTextColumn Header="Item Description" Binding="{Binding ItemName}" />
-                <DataGridCheckBoxColumn Header="BOM" Binding="{Binding UseBOM}" />
-                <DataGridTextColumn Header="Status" Binding="{Binding Status}" />
-                <DataGridTextColumn Header="Parts" Binding="{Binding PartsCost, StringFormat=\{0:0.0000\}}"
-                                    ElementStyle="{StaticResource RightCell}" />
-                <DataGridTextColumn Header="Labor" Binding="{Binding LaborCost, StringFormat=\{0:0.0000\}}"
-                                    ElementStyle="{StaticResource RightCell}" />
-                <DataGridTextColumn Header="Price" Binding="{Binding BuyUnitPrice, StringFormat=\{0:0.0000\}}"
-                                    ElementStyle="{StaticResource RightCell}" />
-                <DataGridTextColumn Header="Quantity" Binding="{Binding ItemQuantity}" />
-                <DataGridTextColumn Header="Total" Binding="{Binding Total, StringFormat=\{0:0.0000\}}" 
-                                    ElementStyle="{StaticResource RightCell}" />
-                <DataGridTextColumn Header="Setup Cost" Binding="{Binding SetupCost, StringFormat=\{0:0.00\}}" />
-                <DataGridTextColumn Header="Piece Cost" Binding="{Binding PieceCost, StringFormat=\{0:0.00\}}" />
-                <DataGridTextColumn Header="Notes" Binding="{Binding Notes}" />
-            </DataGrid.Columns>
+        <DataGrid x:Name="DataGrid"
+                  ItemsSource="{Binding DataView}"
+                  AutoGeneratingColumn="DataGrid_OnAutoGeneratingColumn"
+                  PreviewKeyDown="DataGrid_OnPreviewKeyDown"
+                  PreviewMouseDoubleClick="DataGrid_OnPreviewMouseDoubleClick"  
+                  IsReadOnly="True">
         </DataGrid>
     </DockPanel>
 

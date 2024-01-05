@@ -1,235 +1,117 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.IO;
-using System.Linq;
-using System.Threading;
+using System.Diagnostics;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using SSItemPricer.Annotations;
-using SSItemPricer.Models;
 
 namespace SSItemPricer
 {
     public partial class MainWindow : Window
     {
-        private const int LaborRateItemNumber = 10030791;
-
-        private readonly ViewModel _viewModel;
-        private readonly BackgroundWorker _worker;
-        private int _remaining;
-        private int _last;
-        private int _pass = 1;
-
         public MainWindow()
         {
             InitializeComponent();
 
-            _viewModel = (ViewModel)DataContext;
-            
-            _viewModel.Version = $" v{typeof(MainWindow).Assembly.GetName().Version}";
+            DataGrid.Focus();
+        }
 
-            foreach (var item in Mis.FindMany<Item>(
-                         "SELECT *  FROM dbo.tblItem JOIN dbo.tblItemVendor ON (ItemID = ItemNumber AND VendorPriority = 1) ORDER BY ItemNumber"))
+        private void SearchBox_OnPreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            StatusBarItem.Content = "";
+
+            if (e.Key != Key.Enter || int.TryParse(SearchBox.Text, out var itemNumber) == false) return;
+
+            SearchBox.Text = "";
+            ViewModel.DataView.Sort = "Item Number";
+            DataGrid.SelectedIndex = ViewModel.DataView.Find(itemNumber.ToString());
+
+            if (DataGrid.SelectedIndex == -1)
             {
-                item.BuyUnitPrice = item.UseBOM ? 0M : item.BuyUnitPrice;
-
-                item.Status = item.ECOStatusID switch
-                {
-                    1 => "Draft",
-                    2 => "Review",
-                    3 => "Purchase Hold",
-                    4 => "Released",
-                    5 => "Discontinued",
-                    6 => "Obsolete",
-                    _ => "UNKNOWN"
-                };
-                _viewModel.Items.Add(item);
+                StatusBarItem.Content = $"{itemNumber} not found";
+                return;
             }
 
-            _last = _remaining = _viewModel.Items.Count(i => i.Calculated == false);
-            StatusBarItem.Content =
-                $"{_viewModel.Items.Count} items to be calculated";
-
-            _worker = new BackgroundWorker()
-            {
-                WorkerReportsProgress = true,
-                WorkerSupportsCancellation = true
-            };
-
-            _worker.DoWork += WorkerOnDoWork;
-            _worker.ProgressChanged += OnWorkerOnProgressChanged;
-            _worker.RunWorkerCompleted += OnWorkerOnRunWorkerCompleted;
-        }
-
-        private void OnWorkerOnProgressChanged(object sender, ProgressChangedEventArgs e)
-        {
-            StatusBarItem.Content = $"Pass {_pass}: {e.ProgressPercentage}% of {_remaining} items.";
-        }
-
-        private void OnWorkerOnRunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
-        {
-            CancelBtn.Visibility = Visibility.Hidden;
-            if (e.Cancelled == true)
-                StatusBarItem.Content = "Scan Cancelled";
-
-            else if (e.Error != null)
-                StatusBarItem.Content = $"Scan Error: {e.Error.Message}";
-
-            else
-            {
-                _last = _remaining;
-                _remaining = _viewModel.Items.Count(i => i.Calculated == false);
-                if (_last == _remaining)
-                    StatusBarItem.Content = $"Calculations completed. ({_remaining} items could not be calculated).";
-                else
-                {
-                    _pass++;
-                    _worker.RunWorkerAsync(_viewModel.Items.ToList());
-                }
-            }
-        }
-
-        private void Calculate_Clicked(object sender, RoutedEventArgs e)
-        {
-            CancelBtn.Visibility = Visibility.Visible;
-            _worker.RunWorkerAsync(_viewModel.Items.ToList());
-
-            DataGrid.SelectedItem = _viewModel.Items.FirstOrDefault(i => i.ItemNumber == 10030094);
-            DataGrid.UpdateLayout();
             DataGrid.ScrollIntoView(DataGrid.SelectedItem);
+            DataGrid.Focus();
         }
 
-        private void Cancel_Clicked(object sender, RoutedEventArgs e) => _worker.CancelAsync();
+        private void DataGrid_OnAutoGeneratingColumn(object? sender, DataGridAutoGeneratingColumnEventArgs e)
+            => App.AutoGeneratingColumn(sender, e);
 
-
-        private void DataGridKeyDown(object sender, KeyEventArgs e)
+        private void DataGrid_OnPreviewTextInput(object sender, TextCompositionEventArgs e)
         {
-            if (e.Key != Key.Return) return;
+            if (int.TryParse(e.Text, out var itemNumber) == false) return;
 
-            ShowBomWindow(sender);
+            SearchBox.Text = e.Text;
+            SearchBox.CaretIndex = 1;
+            SearchBox.Focus();
+
+            e.Handled = true;
         }
 
-        private void DataGridDoubleClick(object sender, MouseButtonEventArgs e)
+        private void DataGrid_OnPreviewKeyDown(object sender, KeyEventArgs e)
         {
-            ShowBomWindow(sender);
+            if (e.Key == Key.Enter && Keyboard.Modifiers == ModifierKeys.Control)
+                e.Handled = App.ShowBomWindow(DataGrid, this);
         }
 
-        private void ShowBomWindow(object sender)
+        private void DataGrid_OnPreviewMouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
-            if (sender is not DataGrid dataGrid) return;
-
-            if (dataGrid.SelectedItem is not Item item) return;
-
-            if (item.UseBOM == false) return;
-
-            new BomWindow(item, _viewModel.Items) { Owner = this }.Show();
+            e.Handled = App.ShowBomWindow(DataGrid, this);
         }
 
-
-        private static void WorkerOnDoWork([CanBeNull] object sender, DoWorkEventArgs e)
+        private async void Export_OnClick(object sender, RoutedEventArgs e)
         {
-            if (sender is not BackgroundWorker worker || e.Argument is not List<Item> items) return;
+            ViewModel.Message = "Exporting pricing...";
 
-            var itemsToCalculate = items.Where(i => i.Calculated == false).ToList();
+            var fileName = await App.ExportTable(ViewModel.DataView.Table!, this);
 
-            for (var i = 0; i < itemsToCalculate.Count; i++)
+            ViewModel.Message = "Export completed. Opening workbook...";
+
+            await Task.Run(() =>
             {
-                if (worker.CancellationPending)
-                {
-                    e.Cancel = true;
-                    break;
-                }
+                Process.Start(new ProcessStartInfo { FileName = fileName, UseShellExecute = true });
+            });
 
-                if (itemsToCalculate[i].Calculated == false)
-                {
-                    GetCost(items, itemsToCalculate[i]);
-                    Thread.Sleep(0);
-                }
+            ViewModel.Message = string.Empty;
+        }
 
-                worker.ReportProgress((int)(100 * i / (float)itemsToCalculate.Count));
+        private async void Import_CatalogItems(object sender, RoutedEventArgs e)
+        {
+            ViewModel.Message = "Importing catalog items...";
+
+            var count = await SetCatalogItemsAsync();
+
+            ViewModel.Message = $"Imported {count} catalog items.";
+        }
+
+        private async Task<int> SetCatalogItemsAsync()
+        {
+            CatalogItems? catalogItems = null;
+
+            try
+            {
+                await Task.Run(() => { catalogItems = new CatalogItems(); });
+
+                foreach (var itemNumber in catalogItems!.ItemNumbers)
+                    ViewModel.ItemIsInCatalog(itemNumber);
             }
-        }
-
-        private static void GetCost(List<Item> items, Item item)
-        {
-            item.Notes = "";
-            item.BuyUnitPrice = 0M;
-
-            var vendor = Mis.FindOne<ItemVendor>(@$"
-                SELECT * FROM dbo.tblItemVendor AS I 
-                JOIN dbo.tblVendor AS V ON (V.VendorID = I.VendorID) 
-                WHERE ItemID={item.ItemNumber} AND VendorPriority=1"
-            );
-
-            if (vendor == null)
+            catch (Exception exception)
             {
-                item.Notes = "Item has no Vendor";
-                item.Calculated = true;
-                return;
+                MessageBox.Show(exception.Message, "Import Catalog Items", MessageBoxButton.OK, MessageBoxImage.Error);
             }
 
-            item.SetupCost = vendor.SetupCost;
-            item.PieceCost = vendor.PieceCost;
+            return catalogItems!.ItemNumbers.Count;
+        }
 
-            if (vendor.UseBOM == false)
-            {
-                item.BuyUnitPrice = vendor.BuyUnitPrice;
-                item.Calculated = true;
+        private async void MainWindow_OnLoaded(object sender, RoutedEventArgs e)
+        {
+            ViewModel.Message = "Creating item pricing...";
 
-                return;
-            }
+            await ViewModel.LoadSql();
 
-            item.UseBOM = true;
-
-            var buyUnitPrice = 0M;
-            var laborCost = 0M;
-            var bomItems =
-                Mis.FindMany<BOMItems>($@"
-                    SELECT * FROM dbo.tblBOMItems AS B 
-                    JOIN dbo.tblItem AS I ON (B.ItemID = I.ItemNumber) 
-                    JOIN dbo.tblItemVendor AS V ON (V.ItemID=I.ItemNumber AND V.VendorPriority=1) 
-                    WHERE B.BOMID={item.ItemNumber}"
-                );
-
-            if (bomItems.Count == 0)
-                item.Notes = "Item BOM is empty";
-
-            foreach (var bomItem in bomItems)
-            {
-                if (item.Discontinued == false && bomItem.Discontinued)
-                    item.Notes = "Item BOM contains discontinued item(s)";
-
-                if (bomItem.ItemNumber == item.ItemNumber)
-                {
-                    item.Notes = "Item BOM contains itself";
-                    return;
-                }
-
-                var lookup = items.FirstOrDefault(i => i.ItemNumber == bomItem.ItemNumber);
-
-                if (lookup == null)
-                {
-                    item.Notes = $"Could not find BOM item ({bomItem.ItemNumber})";
-                    return;
-                }
-
-                if (lookup.Calculated == false)
-                {
-                    item.Notes = $"BOM item not calculated ({bomItem.ItemNumber})";
-                    return;
-                }
-
-                if (bomItem.ItemNumber == LaborRateItemNumber)
-                    laborCost = Math.Round(lookup.BuyUnitPrice * bomItem.ItemQuantity, 4);
-
-                buyUnitPrice += Math.Round(lookup.BuyUnitPrice * bomItem.ItemQuantity, 4);
-            }
-
-            item.LaborCost = laborCost;
-            item.BuyUnitPrice = buyUnitPrice;
-            item.Calculated = true;
+            ViewModel.Message = $"Found {ViewModel.DataView.Count} items.";
         }
     }
 }

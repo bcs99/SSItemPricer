@@ -105,7 +105,7 @@ namespace SSItemPricer2
                 CheckPathExists = true,
                 DefaultExt = ".xlsx",
                 Filter = "Excel (*.xlsx)|*.xlsx",
-                FileName = $"SS Item Pricing ({DateTime.Now:yyyy-M-d}).xlsx"
+                FileName = $"SS Item Pricing ({DateTime.Now:yyyy-MM-dd}).xlsx"
             };
 
             if (dialog.ShowDialog(window) != true)

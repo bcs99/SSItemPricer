@@ -4,15 +4,21 @@ using System.ComponentModel;
 using System.Data;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 
-namespace SSItemPricer2;
+namespace SSItemPricer;
 
-public class MainWindowVm : INotifyPropertyChanged
+public sealed class MainWindowVm : INotifyPropertyChanged
 {
     private string _message = string.Empty;
-    public string? Version { get; set; }
+    private DataView _dataView = new();
+    public string? Version { get; set; } = App.AssemblyVersion;
 
-    public DataView DataView { get; set; }
+    public DataView DataView
+    {
+        get => _dataView;
+        set => SetField(ref _dataView, value);
+    }
 
     public string Message
     {
@@ -20,17 +26,19 @@ public class MainWindowVm : INotifyPropertyChanged
         set => SetField(ref _message, value);
     }
 
-    public MainWindowVm()
+    public async Task LoadSql()
     {
-        Version = App.AssemblyVersion;
-        DataView = App.ExecuteQuery(App.GetEmbeddedResourceFile("MainQuery.SQL"));
-        DataView.Sort = "Item Number";
+        await Task.Run(() =>
+        {
+            DataView = App.ExecuteQuery(App.GetEmbeddedResourceFile("MainQuery.SQL"));
+            DataView.Sort = "Item Number";
+        });
     }
 
     public void ItemIsInCatalog(int itemNumber)
     {
         var index = DataView.Find(itemNumber);
-        
+
         if (index == -1)
             Debug.WriteLine($"Item not found in BOM pricing ({itemNumber}).");
         else
@@ -39,12 +47,12 @@ public class MainWindowVm : INotifyPropertyChanged
 
     public event PropertyChangedEventHandler? PropertyChanged;
 
-    protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
+    private void OnPropertyChanged([CallerMemberName] string? propertyName = null)
     {
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
 
-    protected bool SetField<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
+    private bool SetField<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
     {
         if (EqualityComparer<T>.Default.Equals(field, value)) return false;
         field = value;
