@@ -67,6 +67,8 @@ namespace SSItemPricer
 
             var fileName = await App.ExportTable(ViewModel.DataView.Table!, this);
 
+            if (string.IsNullOrEmpty(fileName)) return;
+            
             ViewModel.Message = "Export completed. Opening workbook...";
 
             await Task.Run(() =>

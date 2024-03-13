@@ -97,6 +97,12 @@ namespace SSItemPricer
             return true;
         }
 
+        /// <summary>
+        /// Exports the specified DataTable table to an Excel file.
+        /// </summary>
+        /// <param name="table">The DataTable to be exported.</param>
+        /// <param name="window">The window used to display the Save file dialog.</param>
+        /// <returns>The path of the exported Excel file.</returns>
         public static async Task<string> ExportTable(DataTable table, Window window)
         {
             var dialog = new SaveFileDialog()
