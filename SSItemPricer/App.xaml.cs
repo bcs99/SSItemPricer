@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Configuration;
 using System.Data;
 using System.Data.SqlClient;
 using System.Diagnostics;
@@ -9,22 +10,57 @@ using System.Windows;
 using System.Windows.Controls;
 using ClosedXML.Excel;
 using Microsoft.Win32;
+using SSItemPricer.Lib.Db;
+using SSItemPricer.Views;
+using UglyToad.PdfPig.Core;
 
 namespace SSItemPricer
 {
     public partial class App : Application
     {
-        private const string ConnectionString = "Server=10.0.0.25,1400; Database=MIS; Uid=web123; Pwd=web123";
+        private static DataTable _gpQuantities = new();
 
         public static string? AssemblyVersion =>
-            //If you want the full four-part version number:
+            // If you want the full four-part version number:
             Assembly.GetExecutingAssembly().GetName().Version?.ToString(4);
-        //You can also reference asm.GetName().Version to get Major, Minor, MajorRevision, MinorRevision
-        //components individually and do with them as you please.
+        // You can also reference Assembly.GetName().Version to get Major, Minor, MajorRevision, MinorRevision
+        // components individually and do with them as you please.
 
-        public static DataView ExecuteQuery(string sql, params SqlParameter[] args)
+        public static async Task GpGetQuantities()
         {
-            using var conn = new SqlConnection(App.ConnectionString);
+            await Task.Run(() =>
+            {
+                _gpQuantities = Db.Read<Gp>(
+                    """
+                    SELECT ITEMNMBR               AS [Item Number], 
+                           ATYALLOC               AS [Allocated], 
+                           (QTYONHND - ATYALLOC)  AS [In Stock] 
+                    FROM IV00102 IV
+                    WHERE RCRDTYPE = 1 AND (QTYONHND > 0 OR ATYALLOC > 0)
+                    """);
+
+                _gpQuantities.PrimaryKey = new[] { _gpQuantities.Columns[0] };
+
+            });
+        }
+
+        public static void UpdateQuantities(DataView dataView)
+        {
+            foreach (DataRowView row in dataView)
+            {
+                var itemNumber = row["Item Number"];
+                var gp = _gpQuantities.Rows.Find(itemNumber);
+
+                if (gp == null) continue;
+
+                row["Allocated"] = gp["Allocated"];
+                row["In Stock"] = gp["In Stock"];
+            }
+        }
+
+        public static DataView ExecuteQuery<T>(string sql, params SqlParameter[] args) where T : IConnectionString
+        {
+            using var conn = new SqlConnection(Activator.CreateInstance<T>().Text);
 
             conn.Open();
 
@@ -130,11 +166,11 @@ namespace SSItemPricer
                 }
 
                 worksheet.SheetView.FreezeRows(1);
-                
-                await Task.Run(() => { worksheet.Cell(2, 1).InsertData(table); });  
+
+                await Task.Run(() => { worksheet.Cell(2, 1).InsertData(table); });
 
                 var columnHeadings = new[] { "Parts", "Labor", "Price", "Setup Cost", "Piece Cost" };
-                
+
                 foreach (var xlColumn in worksheet.Columns())
                 {
                     if (columnHeadings.Contains(xlColumn.Cell(1).Value.ToString()))

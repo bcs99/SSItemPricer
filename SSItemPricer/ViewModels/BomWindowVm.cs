@@ -4,7 +4,7 @@ using System.Data;
 using System.Linq;
 using System.Runtime.CompilerServices;
 
-namespace SSItemPricer;
+namespace SSItemPricer.ViewModels;
 
 public class BomWindowVm : INotifyPropertyChanged
 {
@@ -29,6 +29,7 @@ public class BomWindowVm : INotifyPropertyChanged
         {
             if (value.Equals(_dataView)) return;
             _dataView = value;
+            App.UpdateQuantities(_dataView);
             OnPropertyChanged();
             _total = GetTotal();
             OnPropertyChanged(nameof(Total));

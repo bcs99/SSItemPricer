@@ -3,10 +3,13 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Diagnostics;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
+using System.Windows;
+using SSItemPricer.Lib.Db;
 
-namespace SSItemPricer;
+namespace SSItemPricer.ViewModels;
 
 public sealed class MainWindowVm : INotifyPropertyChanged
 {
@@ -25,13 +28,14 @@ public sealed class MainWindowVm : INotifyPropertyChanged
         get => _message;
         set => SetField(ref _message, value);
     }
-
+ 
     public async Task LoadSql()
     {
         await Task.Run(() =>
         {
-            DataView = App.ExecuteQuery(App.GetEmbeddedResourceFile("MainQuery.SQL"));
+            DataView = App.ExecuteQuery<Mis>(App.GetEmbeddedResourceFile("MainQuery.SQL"));
             DataView.Sort = "Item Number";
+            App.UpdateQuantities(DataView);
         });
     }
 

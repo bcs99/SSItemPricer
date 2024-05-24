@@ -4,7 +4,7 @@
     <TargetFramework>net7.0-windows</TargetFramework>
     <Nullable>enable</Nullable>
     <UseWPF>true</UseWPF>
-    <AssemblyVersion>2.0.1.1</AssemblyVersion>
+    <AssemblyVersion>2.0.1.9</AssemblyVersion>
     <InstallDir>\\FILESERVER\Spartek\Documentation Department\_Applications\SSItemPricer</InstallDir>
   </PropertyGroup>
   <ItemGroup>
@@ -17,12 +17,12 @@
     <PackageReference Include="System.Data.SqlClient" Version="4.8.6" />
   </ItemGroup>
   <ItemGroup>
-    <Page Update="BomWindow.xaml">
+    <Page Update="Views\BomWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <XamlRuntime>Wpf</XamlRuntime>
       <SubType>Designer</SubType>
     </Page>
-    <Page Update="MainWindow.xaml">
+    <Page Update="Views\MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <XamlRuntime>Wpf</XamlRuntime>
       <SubType>Designer</SubType>

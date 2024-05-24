@@ -4,7 +4,7 @@ using System.IO;
 using System.Text.RegularExpressions;
 using UglyToad.PdfPig;
 
-namespace SSItemPricer;
+namespace SSItemPricer.Models;
 
 public class CatalogItems
 {

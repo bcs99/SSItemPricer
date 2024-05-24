@@ -39,7 +39,9 @@ SELECT I.ItemNumber                            AS [Item Number],
        ISNULL(V.VendorName, '-')               AS [Vendor Name],
        ISNULL(IV.VendorItemNumber, '-')        AS [Vendor Item],
        ISNULL(IV.NoItemPerBuyUnit, 0)          AS [Batch Size],
-       ISNULL(SC.CategoryName, '-')            AS Category
+       ISNULL(SC.CategoryName, '-')            AS Category,
+       0                                       AS [Allocated],
+       0                                       AS [In Stock]
 FROM dbo.tblItem I
          FULL JOIN dbo.tblItemVendor IV on I.ItemNumber = IV.ItemID AND IV.VendorPriority = 1
          FULL JOIN dbo.tblVendor V ON IV.VendorID = V.VendorID

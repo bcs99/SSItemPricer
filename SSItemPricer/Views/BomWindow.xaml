@@ -1,9 +1,10 @@
-﻿<Window x:Class="SSItemPricer.BomWindow"
+﻿<Window x:Class="SSItemPricer.Views.BomWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:ssItemPricer="clr-namespace:SSItemPricer"
+        xmlns:viewModels="clr-namespace:SSItemPricer.ViewModels"
         mc:Ignorable="d"
         Title="SS Item Pricer (ver 2)"
         SizeToContent="Height"
@@ -12,7 +13,7 @@
         Width="1000">
 
     <Window.DataContext>
-        <ssItemPricer:BomWindowVm x:Name="ViewModel" />
+        <viewModels:BomWindowVm x:Name="ViewModel" />
     </Window.DataContext>
 
     <Window.CommandBindings>

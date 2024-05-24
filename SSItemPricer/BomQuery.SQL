@@ -39,7 +39,9 @@ SELECT I.ItemNumber                                                      AS [Ite
        IV.UseBOM                                                         AS [Is BOM],
        I.Discontinued                                                    AS Discontinued,
        ES.Description                                                    AS Status,
-       V.VendorName                                                      AS [Vendor Name]
+       V.VendorName                                                      AS [Vendor Name],
+       0                                                                 AS [Allocated],
+       0                                                                 AS [In Stock]
 FROM dbo.tblBOMItems BI
          JOIN dbo.tblItem I ON I.ItemNumber = BI.ItemID
          JOIN dbo.tblItemVendor IV on BI.ItemID = IV.ItemID
