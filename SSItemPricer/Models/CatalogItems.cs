@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.IO;
 using System.Text.RegularExpressions;
+using DocumentFormat.OpenXml.Drawing.Diagrams;
+using SSItemPricer.Lib.Db;
 using UglyToad.PdfPig;
 
 namespace SSItemPricer.Models;
@@ -10,15 +13,28 @@ public class CatalogItems
 {
     private const string DocumentsRoot = @"\\FILESERVER\Spartek\Documentation Department\_Documents";
 
-    private readonly int[] _catalogNumbers = { 10022382, 10023590, 10023591, 10024159, 10025699, 10029471 };
-
     public readonly List<int> ItemNumbers = new();
 
     public CatalogItems()
     {
-        foreach (var number in _catalogNumbers)
+        var catalogNumbers = Db.Read<Mis>(
+                """
+                SELECT ItemID
+                FROM tblDocumentItem DI
+                         JOIN tblItem I ON I.ItemNumber = DI.ItemID
+                         JOIN tblSubCat02 SC ON SC.CatID = I.Category2ID
+                WHERE SC.CategoryName = 'Catalogs'
+                """)
+            .AsEnumerable()
+            .Select(r => r["ItemID"].ToString() ?? string.Empty);
+
+        foreach (var number in catalogNumbers)
         {
-            var documentRoot = Path.Combine(DocumentsRoot, number.ToString());
+            var documentRoot = Path.Combine(DocumentsRoot, number);
+
+            if (Directory.Exists(documentRoot) == false)
+                continue;
+
             var files = Directory.GetFiles(documentRoot, "*.pdf");
             var path = files.Length switch
             {
