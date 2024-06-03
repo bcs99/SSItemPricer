@@ -4,7 +4,7 @@
     <TargetFramework>net7.0-windows</TargetFramework>
     <Nullable>enable</Nullable>
     <UseWPF>true</UseWPF>
-    <AssemblyVersion>2.0.1.10</AssemblyVersion>
+    <AssemblyVersion>2.0.1.11</AssemblyVersion>
     <InstallDir>\\FILESERVER\Spartek\Documentation Department\_Applications\SSItemPricer</InstallDir>
   </PropertyGroup>
   <ItemGroup>

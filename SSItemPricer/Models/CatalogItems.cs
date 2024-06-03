@@ -39,10 +39,12 @@ public class CatalogItems
             var path = files.Length switch
             {
                 1 => files[0],
-                0 => throw new Exception($"No PDF found for catalog.\n{documentRoot}"),
+                0 => null, // throw new Exception($"No PDF found for catalog.\n{documentRoot}"),
                 _ => throw new Exception($"Multiple PDFs found for catalog.\n{documentRoot}")
             };
 
+            if (path is null) continue;
+            
             ReadItemNumbers(path);
         }
 
